@@ -13,8 +13,8 @@ import (
 )
 
 type PostCreateAccountRequestDto struct {
-	Name    string                 `json:"name" validate:"max=255" example:"Satoshi"`
-	Rank    int                    `json:"rank" validate:"gte=0,lte=100" example:"50"`
+	Name    string                 `json:"name" validate:"required,max=255" example:"Satoshi"`
+	Rank    int                    `json:"rank" validate:"required,gte=0,lte=100" example:"50"`
 	Memo    string                 `json:"memo" validate:"omitempty" example:"Memorandum text"`
 	Address string                 `json:"address" validate:"AccountAddressValidation" example:"1JzfdUygUFk2M6KS3ngFMGRsy5vsH4N37a"`
 	Status  entities.AccountStatus `json:"status" validate:"AccountStatusValidation" enums:"On,Off" example:"On"`
