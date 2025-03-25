@@ -20,8 +20,8 @@ var AccountStatusList = []string{string(AccountStatusOn), string(AccountStatusOf
 type Account struct {
 	Id        int64           `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name      string          `json:"name" gorm:"index;type:varchar(255);not null"`
-	Rank      int             `json:"rank" gorm:"index;type:tinyint;not null;default:0"`
-	Memo      string          `json:"memo" gorm:"index;type:text"`
+	Rank      int             `json:"rank" gorm:"type:tinyint;not null;default:0"`
+	Memo      string          `json:"memo" gorm:"type:text"`
 	Address   string          `json:"address" gorm:"uniqueIndex:account_address_unique_idx;type:varchar(64);not null"`
 	Balance   decimal.Decimal `json:"balance" gorm:"type:decimal(64,8);default:0;not null"`
 	Status    AccountStatus   `json:"status" gorm:"index:account_status_idx;type:enum('On','Off');not null"`
@@ -34,7 +34,11 @@ func (Account) TableName() string {
 	return AccountTable
 }
 
-func CreateAccount(rank int, name, memo, address string, status AccountStatus) *Account {
+func CreateAccount(
+	rank int,
+	name, memo, address string,
+	status AccountStatus,
+) *Account {
 	return &Account{
 		Name:    name,
 		Rank:    rank,
