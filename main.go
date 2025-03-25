@@ -1,7 +1,7 @@
 package main
 
 import (
-	// _ "go-fiber-test-job/docs"
+	_ "go-fiber-test-job/docs"
 	"go-fiber-test-job/src/config"
 	"go-fiber-test-job/src/database"
 	"go-fiber-test-job/src/logger"

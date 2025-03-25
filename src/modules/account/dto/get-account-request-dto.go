@@ -19,6 +19,9 @@ const DEFAULT_ACCOUNT_OFFSET = 0
 var GetAvailableAccountSortField = map[string]string{
 	"id":         "account.id",
 	"updated_at": "account.updated_at",
+	"address":    "account.address",
+	"name":       "account.name",
+	"rank":       "account.rank",
 }
 
 var GetAvailableAccountSortFieldList = func() []string {

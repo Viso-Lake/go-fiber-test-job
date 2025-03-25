@@ -38,18 +38,8 @@ func GetAccountsAndTotal(search string, status entities.AccountStatus, orderPara
 		totalQuery = totalQuery.Where(queryRaw, searchPattern, searchPattern, searchPattern)
 	}
 
-	allowedSortFields := map[string]bool{
-		"id":         true,
-		"updated_at": true,
-		"address":    true,
-		"name":       true,
-		"rank":       true,
-	}
-
 	for key, value := range orderParams {
-		if allowedSortFields[key] && (value == "ASC" || value == "DESC") {
-			query = query.Order(fmt.Sprintf("account.%s %s", key, value))
-		}
+		query = query.Order(fmt.Sprintf("account.%s %s", key, value))
 	}
 
 	query.

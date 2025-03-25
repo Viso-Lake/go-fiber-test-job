@@ -132,21 +132,9 @@ func validationGetAccountsTests(t *testing.T) {
 }
 
 func TestGetAccountsRoute_SuccessNoParams(t *testing.T) {
-	u := &url.URL{
-		Path: fmt.Sprintf("/account"),
-	}
-
 	accounts, total := database.GetAccountsAndTotal("", "", make(map[string]string), accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
 
-	request := httptest.NewRequest("GET", u.String(), nil)
-	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
-	response, _ := test.TestApp.Test(request)
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	// Read the response body and parse JSON
-	var responseDto accountModuleDto.GetAccountResponseDto
-	err := json.NewDecoder(response.Body).Decode(&responseDto)
-	assert.Nil(t, err)
+	responseDto := sendGetAccountRequest(t, url.Values{})
 
 	assert.NotNil(t, responseDto.Offset, "Offset parameter should exist")
 	assert.NotNil(t, responseDto.Count, "Count parameter should exist")
@@ -182,23 +170,9 @@ func TestGetAccountsRoute_SuccessParamsOffsetAndCount(t *testing.T) {
 	query := url.Values{}
 	query.Add("Count", numberUtil.IntToString(params.Count))
 	query.Add("Offset", numberUtil.IntToString(params.Offset))
-
-	u := &url.URL{
-		Path:     fmt.Sprintf("/account"),
-		RawQuery: query.Encode(),
-	}
+	responseDto := sendGetAccountRequest(t, query)
 
 	accounts, total := database.GetAccountsAndTotal("", "", make(map[string]string), params.Offset, params.Count)
-
-	request := httptest.NewRequest("GET", u.String(), nil)
-	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
-	response, _ := test.TestApp.Test(request)
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	// Read the response body and parse JSON
-	var responseDto accountModuleDto.GetAccountResponseDto
-	err := json.NewDecoder(response.Body).Decode(&responseDto)
-	assert.Nil(t, err)
 
 	assert.NotNil(t, responseDto.Offset, "Offset parameter should exist")
 	assert.NotNil(t, responseDto.Count, "Count parameter should exist")
@@ -231,23 +205,9 @@ func TestGetAccountsRoute_SuccessParamsStatus(t *testing.T) {
 
 	query := url.Values{}
 	query.Add("Status", string(params.Status))
-
-	u := &url.URL{
-		Path:     fmt.Sprintf("/account"),
-		RawQuery: query.Encode(),
-	}
+	responseDto := sendGetAccountRequest(t, query)
 
 	accounts, total := database.GetAccountsAndTotal("", params.Status, make(map[string]string), accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
-
-	request := httptest.NewRequest("GET", u.String(), nil)
-	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
-	response, _ := test.TestApp.Test(request)
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	// Read the response body and parse JSON
-	var responseDto accountModuleDto.GetAccountResponseDto
-	err := json.NewDecoder(response.Body).Decode(&responseDto)
-	assert.Nil(t, err)
 
 	assert.NotNil(t, responseDto.Offset, "Offset parameter should exist")
 	assert.NotNil(t, responseDto.Count, "Count parameter should exist")
@@ -280,24 +240,12 @@ func TestGetAccountsRoute_SuccessParamsOrderBy(t *testing.T) {
 
 	query := url.Values{}
 	query.Add("OrderBy", params.OrderBy)
-
-	u := &url.URL{
-		Path:     fmt.Sprintf("/account"),
-		RawQuery: query.Encode(),
-	}
+	responseDto := sendGetAccountRequest(t, query)
 
 	orderParams, err := orderUtil.GetOrderByParamsSecure(params.OrderBy, ",", accountModuleDto.GetAvailableAccountSortFieldList)
+	assert.Nil(t, err, "GetOrderByParamsSecure вернул ошибку")
+
 	accounts, total := database.GetAccountsAndTotal("", "", orderParams, accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
-
-	request := httptest.NewRequest("GET", u.String(), nil)
-	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
-	response, _ := test.TestApp.Test(request)
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	// Read the response body and parse JSON
-	var responseDto accountModuleDto.GetAccountResponseDto
-	err = json.NewDecoder(response.Body).Decode(&responseDto)
-	assert.Nil(t, err)
 
 	assert.NotNil(t, responseDto.Offset, "Offset parameter should exist")
 	assert.NotNil(t, responseDto.Count, "Count parameter should exist")
@@ -336,23 +284,12 @@ func TestGetAccountsRoute_SuccessParamsStatusAndOrderBy(t *testing.T) {
 	query.Add("Status", string(params.Status))
 	query.Add("OrderBy", params.OrderBy)
 
-	u := &url.URL{
-		Path:     fmt.Sprintf("/account"),
-		RawQuery: query.Encode(),
-	}
-
 	orderParams, err := orderUtil.GetOrderByParamsSecure(params.OrderBy, ",", accountModuleDto.GetAvailableAccountSortFieldList)
+	assert.Nil(t, err, "GetOrderByParamsSecure вернул ошибку")
+
 	accounts, total := database.GetAccountsAndTotal("", params.Status, orderParams, accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
 
-	request := httptest.NewRequest("GET", u.String(), nil)
-	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
-	response, _ := test.TestApp.Test(request)
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	// Read the response body and parse JSON
-	var responseDto accountModuleDto.GetAccountResponseDto
-	err = json.NewDecoder(response.Body).Decode(&responseDto)
-	assert.Nil(t, err)
+	responseDto := sendGetAccountRequest(t, query)
 
 	assert.NotNil(t, responseDto.Offset, "Offset parameter should exist")
 	assert.NotNil(t, responseDto.Count, "Count parameter should exist")
@@ -400,23 +337,12 @@ func TestGetAccountsRoute_SuccessParamsOffsetAndCountAndStatusAndOrderBy(t *test
 	query.Add("Status", string(params.Status))
 	query.Add("OrderBy", params.OrderBy)
 
-	u := &url.URL{
-		Path:     fmt.Sprintf("/account"),
-		RawQuery: query.Encode(),
-	}
-
 	orderParams, err := orderUtil.GetOrderByParamsSecure(params.OrderBy, ",", accountModuleDto.GetAvailableAccountSortFieldList)
+	assert.Nil(t, err, "GetOrderByParamsSecure вернул ошибку")
+
 	accounts, total := database.GetAccountsAndTotal(params.Search, params.Status, orderParams, params.Offset, params.Count)
 
-	request := httptest.NewRequest("GET", u.String(), nil)
-	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
-	response, _ := test.TestApp.Test(request)
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	// Read the response body and parse JSON
-	var responseDto accountModuleDto.GetAccountResponseDto
-	err = json.NewDecoder(response.Body).Decode(&responseDto)
-	assert.Nil(t, err)
+	responseDto := sendGetAccountRequest(t, query)
 
 	assert.NotNil(t, responseDto.Offset, "Offset parameter should exist")
 	assert.NotNil(t, responseDto.Count, "Count parameter should exist")
@@ -606,4 +532,22 @@ func TestCreateAccountRoute_Success(t *testing.T) {
 	assert.GreaterOrEqual(t, responseDto.UpdatedAt, start)
 
 	test.CompareAccount(t, accountAfter, responseDto)
+}
+
+func sendGetAccountRequest(t *testing.T, queryParams url.Values) accountModuleDto.GetAccountResponseDto {
+	u := &url.URL{
+		Path:     "/account",
+		RawQuery: queryParams.Encode(),
+	}
+
+	request := httptest.NewRequest("GET", u.String(), nil)
+	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
+	response, _ := test.TestApp.Test(request)
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	var responseDto accountModuleDto.GetAccountResponseDto
+	err := json.NewDecoder(response.Body).Decode(&responseDto)
+	assert.Nil(t, err)
+
+	return responseDto
 }
