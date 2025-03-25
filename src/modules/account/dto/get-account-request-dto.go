@@ -2,14 +2,15 @@ package accountModuleDto
 
 import (
 	"fmt"
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 	errorHelpers "go-fiber-test-job/src/common/error-helpers"
 	errorMessages "go-fiber-test-job/src/common/error-messages"
 	"go-fiber-test-job/src/common/validations"
 	"go-fiber-test-job/src/database/entities"
 	stringUtil "go-fiber-test-job/src/utils/string"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 const DEFAULT_ACCOUNT_COUNT = 100
