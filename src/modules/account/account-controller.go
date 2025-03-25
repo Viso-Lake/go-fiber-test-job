@@ -1,9 +1,10 @@
 package accountModule
 
 import (
-	"github.com/gofiber/fiber/v2"
 	accountModuleDto "go-fiber-test-job/src/modules/account/dto"
 	orderUtil "go-fiber-test-job/src/utils/order"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 // GetAccounts Get list of accounts
@@ -15,6 +16,7 @@ import (
 // @Param offset query int false "This is paging offset. 0 by default" minimum(0) default(0)
 // @Param count query int false "Max item count in single response. 100 by default" minimum(1) maximum(100) default(100)
 // @Param status query string false "Account statuses: On, Off" Enums(On,Off) default(On)
+// @Param search query string false "Search query for accounts (allowed characters: letters and numbers)" example("John Doe")
 // @Param orderBy query string false "Comma-separated sort order options (sort fields: id, updated, sort order: ASC,DESC)" default(id ASC)
 // @Param X-API-Key header string true "Admin api key"
 // @Success 200 {object} accountModuleDto.GetAccountResponseDto
@@ -30,7 +32,7 @@ func GetAccounts(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	accounts, total := getAccounts(dto.Status, orderParams, dto.Offset, dto.Count)
+	accounts, total := getAccounts(dto.Search, dto.Status, orderParams, dto.Offset, dto.Count)
 	return c.Status(fiber.StatusOK).JSON(accountModuleDto.CreateGetAccountResponseDto(dto.Offset, dto.Count, total, accounts))
 }
 
@@ -52,7 +54,7 @@ func CreateAccount(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	account, err := createAccount(dto.Address, dto.Status)
+	account, err := createAccount(dto.Rank, dto.Name, dto.Memo, dto.Address, dto.Status)
 	if err != nil {
 		return err
 	}

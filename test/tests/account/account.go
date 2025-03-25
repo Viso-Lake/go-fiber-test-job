@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	errorHelpers "go-fiber-test-job/src/common/error-helpers"
 	"go-fiber-test-job/src/config"
 	"go-fiber-test-job/src/database"
@@ -21,6 +20,8 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAccountRoute(t *testing.T) {
@@ -87,12 +88,14 @@ func validationGetAccountsTests(t *testing.T) {
 			type Params struct {
 				Count   int                    `json:"count"`
 				Offset  int                    `json:"offset"`
+				Search  string                 `json:"search"`
 				Status  entities.AccountStatus `json:"status"`
 				OrderBy string                 `json:"orderBy"`
 			}
 			params := &Params{
 				Count:   validationTest.params.Count,
 				Offset:  validationTest.params.Offset,
+				Search:  validationTest.params.Search,
 				Status:  validationTest.params.Status,
 				OrderBy: validationTest.params.OrderBy,
 			}
@@ -100,6 +103,7 @@ func validationGetAccountsTests(t *testing.T) {
 			query := url.Values{}
 			query.Add("Count", numberUtil.IntToString(params.Count))
 			query.Add("Offset", numberUtil.IntToString(params.Offset))
+			query.Add("Search", string(params.Search))
 			query.Add("Status", string(params.Status))
 			query.Add("OrderBy", params.OrderBy)
 
@@ -132,7 +136,7 @@ func TestGetAccountsRoute_SuccessNoParams(t *testing.T) {
 		Path: fmt.Sprintf("/account"),
 	}
 
-	accounts, total := database.GetAccountsAndTotal("", make(map[string]string), accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
+	accounts, total := database.GetAccountsAndTotal("", "", make(map[string]string), accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
 
 	request := httptest.NewRequest("GET", u.String(), nil)
 	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
@@ -184,7 +188,7 @@ func TestGetAccountsRoute_SuccessParamsOffsetAndCount(t *testing.T) {
 		RawQuery: query.Encode(),
 	}
 
-	accounts, total := database.GetAccountsAndTotal("", make(map[string]string), params.Offset, params.Count)
+	accounts, total := database.GetAccountsAndTotal("", "", make(map[string]string), params.Offset, params.Count)
 
 	request := httptest.NewRequest("GET", u.String(), nil)
 	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
@@ -233,7 +237,7 @@ func TestGetAccountsRoute_SuccessParamsStatus(t *testing.T) {
 		RawQuery: query.Encode(),
 	}
 
-	accounts, total := database.GetAccountsAndTotal(params.Status, make(map[string]string), accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
+	accounts, total := database.GetAccountsAndTotal("", params.Status, make(map[string]string), accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
 
 	request := httptest.NewRequest("GET", u.String(), nil)
 	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
@@ -283,7 +287,7 @@ func TestGetAccountsRoute_SuccessParamsOrderBy(t *testing.T) {
 	}
 
 	orderParams, err := orderUtil.GetOrderByParamsSecure(params.OrderBy, ",", accountModuleDto.GetAvailableAccountSortFieldList)
-	accounts, total := database.GetAccountsAndTotal("", orderParams, accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
+	accounts, total := database.GetAccountsAndTotal("", "", orderParams, accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
 
 	request := httptest.NewRequest("GET", u.String(), nil)
 	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
@@ -338,7 +342,7 @@ func TestGetAccountsRoute_SuccessParamsStatusAndOrderBy(t *testing.T) {
 	}
 
 	orderParams, err := orderUtil.GetOrderByParamsSecure(params.OrderBy, ",", accountModuleDto.GetAvailableAccountSortFieldList)
-	accounts, total := database.GetAccountsAndTotal(params.Status, orderParams, accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
+	accounts, total := database.GetAccountsAndTotal("", params.Status, orderParams, accountModuleDto.DEFAULT_ACCOUNT_OFFSET, accountModuleDto.DEFAULT_ACCOUNT_COUNT)
 
 	request := httptest.NewRequest("GET", u.String(), nil)
 	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
@@ -377,12 +381,14 @@ func TestGetAccountsRoute_SuccessParamsOffsetAndCountAndStatusAndOrderBy(t *test
 	type Params struct {
 		Count   int                    `json:"count"`
 		Offset  int                    `json:"offset"`
+		Search  string                 `json:"search"`
 		Status  entities.AccountStatus `json:"status"`
 		OrderBy string                 `json:"orderBy"`
 	}
 	params := &Params{
 		Count:   2,
 		Offset:  0,
+		Search:  "sato",
 		Status:  entities.AccountStatusOn,
 		OrderBy: "updated_at ASC",
 	}
@@ -390,6 +396,7 @@ func TestGetAccountsRoute_SuccessParamsOffsetAndCountAndStatusAndOrderBy(t *test
 	query := url.Values{}
 	query.Add("Count", numberUtil.IntToString(params.Count))
 	query.Add("Offset", numberUtil.IntToString(params.Offset))
+	query.Add("Search", string(params.Search))
 	query.Add("Status", string(params.Status))
 	query.Add("OrderBy", params.OrderBy)
 
@@ -399,7 +406,7 @@ func TestGetAccountsRoute_SuccessParamsOffsetAndCountAndStatusAndOrderBy(t *test
 	}
 
 	orderParams, err := orderUtil.GetOrderByParamsSecure(params.OrderBy, ",", accountModuleDto.GetAvailableAccountSortFieldList)
-	accounts, total := database.GetAccountsAndTotal(params.Status, orderParams, params.Offset, params.Count)
+	accounts, total := database.GetAccountsAndTotal(params.Search, params.Status, orderParams, params.Offset, params.Count)
 
 	request := httptest.NewRequest("GET", u.String(), nil)
 	request.Header.Set("X-API-Key", config.AppConfig.AdminXApiKey)
@@ -464,9 +471,15 @@ func validationCreateAccountTests(t *testing.T) {
 		t.Run("TestCreateAccountRoute"+validationTest.name, func(t *testing.T) {
 			type Params struct {
 				Address string                 `json:"address"`
+				Name    string                 `json:"name"`
+				Rank    int                    `json:"rank"`
+				Memo    string                 `json:"memo"`
 				Status  entities.AccountStatus `json:"status"`
 			}
 			params := &Params{
+				Name:    validationTest.params.Name,
+				Rank:    validationTest.params.Rank,
+				Memo:    validationTest.params.Memo,
 				Address: validationTest.params.Address,
 				Status:  validationTest.params.Status,
 			}
@@ -500,9 +513,15 @@ func TestCreateAccountRoute_FailAddressAlreadyExists(t *testing.T) {
 	accountInfo := seeds.ACCOUNTS.ACCOUNT_1
 	type Params struct {
 		Address string                 `json:"address"`
+		Name    string                 `json:"name"`
+		Rank    int                    `json:"rank"`
+		Memo    string                 `json:"memo"`
 		Status  entities.AccountStatus `json:"status"`
 	}
 	params := &Params{
+		Name:    accountInfo.Name,
+		Rank:    accountInfo.Rank,
+		Memo:    accountInfo.Memo,
 		Address: accountInfo.Address,
 		Status:  entities.AccountStatusOn,
 	}
@@ -536,10 +555,16 @@ func TestCreateAccountRoute_Success(t *testing.T) {
 	start := timeUtil.GetUnixTime()
 	type Params struct {
 		Address string                 `json:"address"`
+		Name    string                 `json:"name"`
+		Rank    int                    `json:"rank"`
+		Memo    string                 `json:"memo"`
 		Status  entities.AccountStatus `json:"status"`
 	}
 	params := &Params{
 		Address: "32AaKxGbdhGMSGutcZjspFq9U89jJHW1um",
+		Name:    "Satoshi 5",
+		Rank:    89,
+		Memo:    "memorandum text 5",
 		Status:  entities.AccountStatusOn,
 	}
 	body, _ := json.Marshal(params)

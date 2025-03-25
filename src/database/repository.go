@@ -3,6 +3,8 @@ package database
 import (
 	"fmt"
 	"go-fiber-test-job/src/database/entities"
+	"strings"
+
 	"gorm.io/gorm"
 )
 
@@ -22,14 +24,34 @@ func getDb(tx *gorm.DB) *gorm.DB {
 
 ///// Account queries
 
-func GetAccountsAndTotal(status entities.AccountStatus, orderParams map[string]string, offset int, count int) ([]*entities.Account, int64) {
+func GetAccountsAndTotal(search string, status entities.AccountStatus, orderParams map[string]string, offset int, count int) ([]*entities.Account, int64) {
 	var total int64
 	var accounts []*entities.Account
 	query := getBaseAccountsQuery(status)
 	totalQuery := getBaseAccountsQuery(status)
-	for key, value := range orderParams {
-		query = query.Order(fmt.Sprintf("account.%s %s", key, value))
+
+	search = strings.TrimSpace(search)
+	if search != "" {
+		searchPattern := "%" + strings.ReplaceAll(search, "%", "\\%") + "%"
+		queryRaw := "account.address LIKE ? OR account.name LIKE ? OR account.memo LIKE ?"
+		query = query.Where(queryRaw, searchPattern, searchPattern, searchPattern)
+		totalQuery = totalQuery.Where(queryRaw, searchPattern, searchPattern, searchPattern)
 	}
+
+	allowedSortFields := map[string]bool{
+		"id":         true,
+		"updated_at": true,
+		"address":    true,
+		"name":       true,
+		"rank":       true,
+	}
+
+	for key, value := range orderParams {
+		if allowedSortFields[key] && (value == "ASC" || value == "DESC") {
+			query = query.Order(fmt.Sprintf("account.%s %s", key, value))
+		}
+	}
+
 	query.
 		Limit(count).
 		Offset(offset).
@@ -66,6 +88,7 @@ func GetAccountByAddress(address string) *entities.Account {
 	if account.Id == 0 {
 		return nil
 	}
+
 	return account
 }
 

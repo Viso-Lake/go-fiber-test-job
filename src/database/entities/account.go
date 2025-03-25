@@ -29,17 +29,16 @@ type Account struct {
 	UpdatedAt int64           `json:"updated_at" gorm:"autoUpdateTime;index:account_updated_at_idx;not null"`
 }
 
-// name (varchar(255)),
-// rank (tinyint, from 0 to 100),
-// memo (text, nullable).
-
 // Set the table name for the model
 func (Account) TableName() string {
 	return AccountTable
 }
 
-func CreateAccount(address string, status AccountStatus) *Account {
+func CreateAccount(rank int, name, memo, address string, status AccountStatus) *Account {
 	return &Account{
+		Name:    name,
+		Rank:    rank,
+		Memo:    memo,
 		Address: address,
 		Status:  status,
 	}

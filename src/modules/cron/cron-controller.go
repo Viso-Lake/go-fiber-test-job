@@ -1,8 +1,9 @@
 package cronModule
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-test-job/src/common/dto"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 // UpdateAccountsBalances Update accounts balances

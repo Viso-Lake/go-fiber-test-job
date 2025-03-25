@@ -2,6 +2,9 @@ DROP TABLE IF EXISTS account;
 CREATE TABLE account (
     id BIGINT NOT NULL AUTO_INCREMENT,
     address VARCHAR(64) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    `rank` TINYINT NOT NULL DEFAULT 0,
+    memo TEXT,
     balance DECIMAL(64, 8) NOT NULL DEFAULT 0,
     status ENUM('On', 'Off') NOT NULL,
     created_at INT NOT NULL,

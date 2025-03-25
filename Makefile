@@ -31,3 +31,8 @@ test-run-v:
 
 test-run-s:
 	go test -run TestAllRoutes/TestAccountRoute/TestGetAccountsRoute_SuccessNoParams
+
+
+run-db:
+	docker start db-test || \
+	docker run -d -p 3406:3306 --env MYSQL_ROOT_PASSWORD=root_password --name db-test --rm mysql:latest

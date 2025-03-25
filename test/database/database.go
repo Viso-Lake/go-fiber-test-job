@@ -6,12 +6,13 @@ import (
 	"go-fiber-test-job/src/config"
 	stringUtil "go-fiber-test-job/src/utils/string"
 	timeUtils "go-fiber-test-job/src/utils/time"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/plugin/dbresolver"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/plugin/dbresolver"
 )
 
 // Database instance

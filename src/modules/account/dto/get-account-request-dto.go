@@ -32,6 +32,7 @@ var GetAvailableAccountSortFieldList = func() []string {
 type GetAccountRequestDto struct {
 	Offset  int                    `query:"offset" json:"offset" validate:"min=0" default:"0" example:"5"`
 	Count   int                    `query:"count" json:"count" validate:"min=1,max=100" default:"100" example:"20"`
+	Search  string                 `query:"search" json:"search" validate:"omitempty,max=255" example:"search=Satoshi"`
 	Status  entities.AccountStatus `query:"status" json:"status" validate:"omitempty,AccountStatusValidation" example:"On"`
 	OrderBy string                 `query:"orderBy" json:"orderBy" validate:"omitempty,max=255" example:"id ASC"`
 }
@@ -41,6 +42,7 @@ var getAccountRequestDtoValidator *validator.Validate
 func init() {
 	getAccountRequestDtoValidator = validator.New()
 	_ = getAccountRequestDtoValidator.RegisterValidation("AccountStatusValidation", validations.AccountStatusValidation)
+	_ = getAccountRequestDtoValidator.RegisterValidation("AccountSearchValidation", validations.AccountSearchValidation)
 }
 
 func getAccountRequestDtoDefaultValues(dto *GetAccountRequestDto) {
@@ -96,6 +98,8 @@ func GetAccountRequestDtoValidateErrorMessage(err validator.FieldError) string {
 		errorMessage = fmt.Sprintf("%s must be one of the next values: %s", err.Field(), strings.Join(entities.AccountStatusList, ","))
 	} else if err.Field() == "OrderBy" && err.Tag() == "max" {
 		errorMessage = fmt.Sprintf("%s must be shorter than or equal to %s characters", err.Field(), err.Param())
+	} else if err.Field() == "Search" && err.Tag() == "AccountSearchValidation" {
+		errorMessage = fmt.Sprintf("%s contains invalid characters. Only letters, numbers are allowed.", err.Field())
 	} else {
 		errorMessage = errorMessages.DefaultFieldErrorMessage(err.Field())
 	}
